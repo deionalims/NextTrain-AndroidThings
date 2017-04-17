@@ -1,17 +1,17 @@
 package com.nalims.things.main;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.os.Bundle;
+import com.google.android.things.contrib.driver.apa102.Apa102;
 import com.google.android.things.contrib.driver.ht16k33.AlphanumericDisplay;
 import com.google.android.things.contrib.driver.rainbowhat.RainbowHat;
-import com.google.android.things.pio.Gpio;
 import com.nalims.things.ThingsApplication;
 import java.io.IOException;
 import javax.inject.Inject;
 
 public class MainActivity extends Activity implements MainScreen {
 
-    AlphanumericDisplay display;
     @Inject MainPresenter mainPresenter;
 
     @Override
@@ -26,15 +26,22 @@ public class MainActivity extends Activity implements MainScreen {
         mainPresenter.bind(this);
 
         try {
-            display = RainbowHat.openDisplay();
+            AlphanumericDisplay display = RainbowHat.openDisplay();
             display.setEnabled(true);
             display.display("LOAD");
+            display.close();
 
-            // Light up the Red LED.
-            Gpio led = RainbowHat.openLed(RainbowHat.LED_RED);
-            led.setValue(true);
+            // Light up the rainbow
+            Apa102 ledstrip = RainbowHat.openLedStrip();
+            ledstrip.setBrightness(0);
+            int[] rainbow = new int[RainbowHat.LEDSTRIP_LENGTH];
+            for (int i = 0; i < rainbow.length; i++) {
+                rainbow[i] = Color.HSVToColor(255, new float[]{i * 360.f / rainbow.length, 1.0f, 1.0f});
+            }
+            ledstrip.write(rainbow);
             // Close the device when done.
-            led.close();
+            ledstrip.close();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -46,8 +53,10 @@ public class MainActivity extends Activity implements MainScreen {
     @Override
     public void display(String toDisplay) {
         try {
+            AlphanumericDisplay display = RainbowHat.openDisplay();
+            display.setEnabled(true);
             display.display(toDisplay);
-
+            display.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -55,11 +64,6 @@ public class MainActivity extends Activity implements MainScreen {
 
     @Override
     protected void onDestroy() {
-        try {
-            display.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         mainPresenter.unbind();
         super.onDestroy();
     }

@@ -54,11 +54,12 @@ public class MainPresenter {
         try {
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(simpleDateFormat.parse(train.getDate()));
+
             Date now = new Date();
             long diffInMill = calendar.getTimeInMillis() - now.getTime();
-            int diffInMinutes = (int) ((diffInMill / (1000 * 60)) % 60);
+            int diffInMinutes = (int) TimeUnit.MILLISECONDS.toMinutes(diffInMill) % 60;
             if (diffInMinutes > 60){
-                int hours = diffInMinutes / 60;
+                int hours = (int) TimeUnit.MILLISECONDS.toHours(diffInMill);
                 int minutes = diffInMinutes % 60;
                 screen.display(hours + "h" + minutes);
             } else {
