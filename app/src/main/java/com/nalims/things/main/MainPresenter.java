@@ -35,9 +35,10 @@ public class MainPresenter {
 
     void getNextTrains() {
         scheduledExecutorService.scheduleAtFixedRate(() -> sncfRepository.getNextTrains(COLOMBES_ID)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(trainResponse ->  onResponseBodyReceived(trainResponse)), 0, INTERVAL, TimeUnit.SECONDS);
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(trainResponse -> onResponseBodyReceived(trainResponse)), 0, INTERVAL,
+            TimeUnit.SECONDS);
     }
 
     private void onResponseBodyReceived(TrainResponse trainResponse) {
@@ -57,8 +58,9 @@ public class MainPresenter {
 
             Date now = new Date();
             long diffInMill = calendar.getTimeInMillis() - now.getTime();
-            int diffInMinutes = (int) TimeUnit.MILLISECONDS.toMinutes(diffInMill) % 60;
-            if (diffInMinutes > 60){
+            int diffInMinutes = (int) TimeUnit.MILLISECONDS.toMinutes(diffInMill)
+                % 60; // <-- My device does not have the right date and time set. Hence the % 60.
+            if (diffInMinutes > 60) {
                 int hours = (int) TimeUnit.MILLISECONDS.toHours(diffInMill);
                 int minutes = diffInMinutes % 60;
                 screen.display(hours + "h" + minutes);
