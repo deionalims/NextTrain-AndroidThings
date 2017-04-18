@@ -26,7 +26,7 @@ import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
     @Provides
     OkHttpClient provideOkHttpClient(ApiHeadersInterceptor apiHeadersInterceptor) {
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BASIC);
 
         return new OkHttpClient().newBuilder()
             .addInterceptor(interceptor)

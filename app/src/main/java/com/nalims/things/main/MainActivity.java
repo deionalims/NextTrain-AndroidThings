@@ -14,6 +14,8 @@ public class MainActivity extends Activity implements MainScreen {
 
     @Inject MainPresenter mainPresenter;
 
+    private AlphanumericDisplay display;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,10 +28,9 @@ public class MainActivity extends Activity implements MainScreen {
         mainPresenter.bind(this);
 
         try {
-            AlphanumericDisplay display = RainbowHat.openDisplay();
+            display = RainbowHat.openDisplay();
             display.setEnabled(true);
             display.display("LOAD");
-            display.close();
 
             // Light up the rainbow
             Apa102 ledstrip = RainbowHat.openLedStrip();
@@ -53,10 +54,7 @@ public class MainActivity extends Activity implements MainScreen {
     @Override
     public void display(String toDisplay) {
         try {
-            AlphanumericDisplay display = RainbowHat.openDisplay();
-            display.setEnabled(true);
             display.display(toDisplay);
-            display.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -65,6 +63,11 @@ public class MainActivity extends Activity implements MainScreen {
     @Override
     protected void onDestroy() {
         mainPresenter.unbind();
+        try {
+            display.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         super.onDestroy();
     }
 }

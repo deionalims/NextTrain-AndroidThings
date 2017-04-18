@@ -37,11 +37,11 @@ public class MainPresenter {
         scheduledExecutorService.scheduleAtFixedRate(() -> sncfRepository.getNextTrains(COLOMBES_ID)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(trainResponse -> onResponseBodyReceived(trainResponse)), 0, INTERVAL,
+                .subscribe(this::onTrainResponseReceived, this::onError), 0, INTERVAL,
             TimeUnit.SECONDS);
     }
 
-    private void onResponseBodyReceived(TrainResponse trainResponse) {
+    private void onTrainResponseReceived(TrainResponse trainResponse) {
         Train train = null;
 
         for (Train tr : trainResponse.getTrainList()) {
@@ -51,24 +51,28 @@ public class MainPresenter {
             }
         }
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_PATTERN);
-        try {
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(simpleDateFormat.parse(train.getDate()));
+        if (train == null){
+            return;
+        }
 
-            Date now = new Date();
-            long diffInMill = calendar.getTimeInMillis() - now.getTime();
-            int diffInMinutes = (int) TimeUnit.MILLISECONDS.toMinutes(diffInMill)
-                % 60; // <-- My device does not have the right date and time set. Hence the % 60.
-            if (diffInMinutes > 60) {
-                int hours = (int) TimeUnit.MILLISECONDS.toHours(diffInMill);
-                int minutes = diffInMinutes % 60;
-                screen.display(hours + "h" + minutes);
-            } else {
-                screen.display(diffInMinutes + "mn");
-            }
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_PATTERN);
+        Calendar calendar = Calendar.getInstance();
+        try {
+            calendar.setTime(simpleDateFormat.parse(train.getDate()));
         } catch (ParseException e) {
             onError(e);
+        }
+
+        Date now = new Date();
+        long diffInMill = calendar.getTimeInMillis() - now.getTime();
+        int diffInMinutes = (int) TimeUnit.MILLISECONDS.toMinutes(diffInMill);
+        diffInMinutes = diffInMinutes < 0 ? 0 : diffInMinutes;
+        if (diffInMinutes > 60) {
+            int hours = (int) TimeUnit.MILLISECONDS.toHours(diffInMill);
+            int minutes = diffInMinutes % 60;
+            screen.display(hours + "h" + minutes);
+        } else {
+            screen.display(diffInMinutes + "mn");
         }
     }
 
