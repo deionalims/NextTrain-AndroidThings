@@ -8,7 +8,6 @@ import io.reactivex.schedulers.Schedulers;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -42,29 +41,31 @@ public class MainPresenter {
     }
 
     private void onTrainResponseReceived(TrainResponse trainResponse) {
-        Train train = null;
+        Train nextTrain = null;
 
         for (Train tr : trainResponse.getTrainList()) {
             if (tr.getTerm() == SAINT_LAZARE_ID) {
-                train = tr;
+                nextTrain = tr;
                 break;
             }
         }
 
-        if (train == null){
+        if (nextTrain == null){
             return;
         }
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_PATTERN);
-        Calendar calendar = Calendar.getInstance();
+        Calendar nextTrainCalendar = Calendar.getInstance();
         try {
-            calendar.setTime(simpleDateFormat.parse(train.getDate()));
+            nextTrainCalendar.setTime(simpleDateFormat.parse(nextTrain.getDate()));
         } catch (ParseException e) {
             onError(e);
         }
 
-        Date now = new Date();
-        long diffInMill = calendar.getTimeInMillis() - now.getTime();
+        Calendar now = Calendar.getInstance();
+        now.add(Calendar.HOUR, 2); // <-- My device is not set on my Time Zone. Hence the +2 hours.
+
+        long diffInMill = nextTrainCalendar.getTimeInMillis() - now.getTimeInMillis();
         int diffInMinutes = (int) TimeUnit.MILLISECONDS.toMinutes(diffInMill);
         diffInMinutes = diffInMinutes < 0 ? 0 : diffInMinutes;
         if (diffInMinutes > 60) {
