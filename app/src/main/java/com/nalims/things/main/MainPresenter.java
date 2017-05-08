@@ -14,8 +14,9 @@ import java.util.concurrent.TimeUnit;
 
 public class MainPresenter {
 
-    private static int INTERVAL = 10;
     private static final String DATE_PATTERN = "dd/MM/yyyy HH:mm";
+    private static final String MINUTES_PATTERN = "mm'mn'";
+    private static final String HOURS_MINUTES_PATTENR = "H'h'mm'mn'";
     private static final int COLOMBES_ID = 87381087;
     private static final int SAINT_LAZARE_ID = 87384008;
 
@@ -33,6 +34,7 @@ public class MainPresenter {
     }
 
     void getNextTrains() {
+        int INTERVAL = 10;
         scheduledExecutorService.scheduleAtFixedRate(() -> sncfRepository.getNextTrains(COLOMBES_ID)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -50,7 +52,7 @@ public class MainPresenter {
             }
         }
 
-        if (nextTrain == null){
+        if (nextTrain == null) {
             return;
         }
 
@@ -65,16 +67,14 @@ public class MainPresenter {
         Calendar now = Calendar.getInstance();
         now.add(Calendar.HOUR, 2); // <-- My device is not set on my Time Zone. Hence the +2 hours.
 
-        long diffInMill = nextTrainCalendar.getTimeInMillis() - now.getTimeInMillis();
-        int diffInMinutes = (int) TimeUnit.MILLISECONDS.toMinutes(diffInMill);
-        diffInMinutes = diffInMinutes < 0 ? 0 : diffInMinutes;
-        if (diffInMinutes > 60) {
-            int hours = (int) TimeUnit.MILLISECONDS.toHours(diffInMill);
-            int minutes = diffInMinutes % 60;
-            screen.display(hours + "h" + minutes);
-        } else {
-            screen.display(diffInMinutes + "mn");
-        }
+        Calendar diffCalendar = Calendar.getInstance();
+        diffCalendar.setTimeInMillis(nextTrainCalendar.getTimeInMillis() - now.getTimeInMillis());
+
+        SimpleDateFormat diffDateFormat =
+            diffCalendar.get(Calendar.HOUR) > 0 ? new SimpleDateFormat(HOURS_MINUTES_PATTENR)
+                : new SimpleDateFormat(MINUTES_PATTERN);
+
+        screen.display(diffDateFormat.format(diffCalendar.getTime()));
     }
 
     private void onError(Throwable t) {
