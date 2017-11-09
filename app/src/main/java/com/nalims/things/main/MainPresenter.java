@@ -1,5 +1,6 @@
 package com.nalims.things.main;
 
+import android.util.Log;
 import com.nalims.things.api.SncfRepository;
 import com.nalims.things.model.Train;
 import com.nalims.things.model.TrainResponse;
@@ -35,7 +36,7 @@ public class MainPresenter {
 
     void getNextTrains() {
         int INTERVAL = 10;
-        scheduledExecutorService.scheduleAtFixedRate(() -> sncfRepository.getNextTrains(COLOMBES_ID)
+        scheduledExecutorService.scheduleAtFixedRate(() -> sncfRepository.getNextTrainsWithArrival(COLOMBES_ID, SAINT_LAZARE_ID)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(this::onTrainResponseReceived, this::onError), 0, INTERVAL,
@@ -43,18 +44,9 @@ public class MainPresenter {
     }
 
     private void onTrainResponseReceived(TrainResponse trainResponse) {
-        Train nextTrain = null;
+        Train nextTrain = trainResponse.getTrainList().get(0);
 
-        for (Train tr : trainResponse.getTrainList()) {
-            if (tr.getTerm() == SAINT_LAZARE_ID) {
-                nextTrain = tr;
-                break;
-            }
-        }
-
-        if (nextTrain == null) {
-            return;
-        }
+        Log.v("TAG", "Next Train : " + nextTrain.getDate());
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_PATTERN);
         Calendar nextTrainCalendar = Calendar.getInstance();
@@ -65,15 +57,20 @@ public class MainPresenter {
         }
 
         Calendar now = Calendar.getInstance();
-        now.add(Calendar.HOUR, 2); // <-- My device is not set on my Time Zone. Hence the +2 hours.
 
         Calendar diffCalendar = Calendar.getInstance();
-        diffCalendar.setTimeInMillis(nextTrainCalendar.getTimeInMillis() - now.getTimeInMillis());
+        diffCalendar.set(Calendar.HOUR, 0);
+        diffCalendar.set(Calendar.MINUTE, 0);
+        long diff = nextTrainCalendar.getTimeInMillis() - now.getTimeInMillis();
+        if (diff < 0){
+            screen.display("LATE");
+            return;
+        }
+        diffCalendar.add(Calendar.MILLISECOND, (int) diff);
 
         SimpleDateFormat diffDateFormat =
             diffCalendar.get(Calendar.HOUR) > 0 ? new SimpleDateFormat(HOURS_MINUTES_PATTENR)
                 : new SimpleDateFormat(MINUTES_PATTERN);
-
         screen.display(diffDateFormat.format(diffCalendar.getTime()));
     }
 

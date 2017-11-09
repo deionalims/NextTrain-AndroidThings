@@ -12,7 +12,7 @@ public class SncfRepository {
         this.sncfApi = sncfApi;
     }
 
-    public Observable<ResponseBody> getNextTrainsWithArrival(int from, int to){
+    public Observable<TrainResponse> getNextTrainsWithArrival(int from, int to){
         return sncfApi.getNextTrainsWithArrival(from, to);
     }
 
