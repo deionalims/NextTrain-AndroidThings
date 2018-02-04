@@ -43,6 +43,10 @@ public class MainPresenter {
     }
 
     private void onTrainResponseReceived(TrainResponse trainResponse) {
+        if (trainResponse.getTrainList() == null || trainResponse.getTrainList().size() == 0){
+            screen.display("NoTr");
+            return;
+        }
         Train nextTrain = trainResponse.getTrainList().get(0);
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_PATTERN);

@@ -10,7 +10,7 @@ public class TrainResponse {
 
     @Attribute(name = "gare")
     private int gare;
-    @ElementList(inline = true) List<Train> trainList;
+    @ElementList(inline = true, required = false) List<Train> trainList;
 
     public List<Train> getTrainList() {
         return trainList;
