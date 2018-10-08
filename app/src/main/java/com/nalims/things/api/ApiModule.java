@@ -4,17 +4,19 @@ import android.content.Context;
 import com.nalims.things.R;
 import dagger.Module;
 import dagger.Provides;
-import java.io.UnsupportedEncodingException;
-import javax.inject.Singleton;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
+import okhttp3.logging.HttpLoggingInterceptor.Level;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
 
+import javax.inject.Singleton;
+import java.io.UnsupportedEncodingException;
+
 @Module public class ApiModule {
 
-    private static final String BASE_URL = "http://api.transilien.com/";
+    private static final String BASE_URL = "https://api.transilien.com/";
 
     private final Context context;
 
@@ -26,7 +28,7 @@ import retrofit2.converter.simplexml.SimpleXmlConverterFactory;
     @Provides
     OkHttpClient provideOkHttpClient(ApiHeadersInterceptor apiHeadersInterceptor) {
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
-        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        interceptor.setLevel(Level.BODY);
 
         return new OkHttpClient().newBuilder()
             .addInterceptor(interceptor)
