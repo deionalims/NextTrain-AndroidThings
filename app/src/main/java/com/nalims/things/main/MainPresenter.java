@@ -9,6 +9,7 @@ import io.reactivex.schedulers.Schedulers;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.concurrent.Executors;
@@ -57,7 +58,7 @@ public class MainPresenter {
                                  .filter(dif -> dif >= 0)
                                  .findFirst()
                                  .orElse(-1L);
-        Log.d("MICHEL", "diff = " + diff);
+
         if (diff < 0){
             onError(null);
         }
@@ -89,6 +90,7 @@ public class MainPresenter {
     }
 
     private void onError(Throwable t) {
+        Log.e("ERROR", Arrays.toString(t.getStackTrace()));
         screen.display("ERR");
     }
 

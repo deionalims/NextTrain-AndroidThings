@@ -5,12 +5,14 @@ import android.os.Bundle;
 import com.google.android.things.contrib.driver.ht16k33.AlphanumericDisplay;
 import com.google.android.things.contrib.driver.rainbowhat.RainbowHat;
 import com.nalims.things.ThingsApplication;
-import java.io.IOException;
+
 import javax.inject.Inject;
+import java.io.IOException;
 
 public class MainActivity extends Activity implements MainScreen {
 
-    @Inject MainPresenter mainPresenter;
+    @Inject
+    MainPresenter mainPresenter;
 
     private AlphanumericDisplay display;
 
@@ -19,9 +21,9 @@ public class MainActivity extends Activity implements MainScreen {
         super.onCreate(savedInstanceState);
 
         ThingsApplication.getThingsApplication(this)
-            .getApiComponent()
-            .plus(new MainModule())
-            .inject(this);
+                         .getApiComponent()
+                         .plus(new MainModule())
+                         .inject(this);
 
         try {
             display = RainbowHat.openDisplay();
